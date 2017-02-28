@@ -17,6 +17,9 @@ public class Runner {
 
     public static void main(String[] args) {
 
+        Vector2 resolution = new Vector2(1920, 1080);
+        int ssFactor = 3;
+
         long startTime = System.nanoTime();
 
         Camera camera = new Camera(
@@ -33,13 +36,13 @@ public class Runner {
         scene.add(new Sphere(new Vector3(2, -5, 2.3), 2.3));
 
         RayCaster rc = new RayCaster(scene, 1);
-        LightMap lightMap = camera.render(new Vector2(1920, 1080), rc);
+        LightMap lightMap = camera.render(resolution.multiply(ssFactor), rc);
 
         long rayTime = System.nanoTime();
         System.out.println("Raytracing done.");
 
         ImageRenderer ir = new ImageRenderer(new AutoExposureGammaStrategy(2.2));
-        RenderedImage image = ir.render(lightMap, 1);
+        RenderedImage image = ir.render(lightMap, ssFactor);
 
         long rgbTime = System.nanoTime();
         System.out.println("RGB conversion done.");
