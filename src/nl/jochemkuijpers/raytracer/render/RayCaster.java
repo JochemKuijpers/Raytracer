@@ -2,7 +2,7 @@ package nl.jochemkuijpers.raytracer.render;
 
 import nl.jochemkuijpers.raytracer.math.Ray;
 import nl.jochemkuijpers.raytracer.math.RayCollision;
-import nl.jochemkuijpers.raytracer.math.Vector3;
+import nl.jochemkuijpers.raytracer.math.Vector;
 import nl.jochemkuijpers.raytracer.shape.Shape;
 
 import java.util.List;
@@ -28,7 +28,6 @@ public class RayCaster {
     private void cast(Ray ray, int depth) {
         // recursive stop condition
         if (depth > maxDepth) {
-            ray.light = Vector3.ZERO;
             return;
         }
 
@@ -37,7 +36,6 @@ public class RayCaster {
         RayCollision collision = findNearestCollision(ray, shapes);
 
         if (collision == null) {
-            ray.light = Vector3.ZERO;
             return;
         }
 
@@ -47,12 +45,12 @@ public class RayCaster {
 
         // TODO cast recursive rays based on material properties
 
-        ray.light = collision.normal;
+        ray.light.set(collision.normal);
     }
 
     private RayCollision findNearestCollision(Ray ray, List<Shape> shapes) {
         double nearestDistance = 1e30;
-        double distance = 0;
+        double distance;
         RayCollision nearestCollision = null;
         RayCollision collision;
 
@@ -62,7 +60,7 @@ public class RayCaster {
                 continue;
             }
 
-            distance = ray.origin.subtract(collision.collidePosition).lengthSquared();
+            distance = Vector.differenceLengthSquared(ray.origin, collision.collidePosition);
             if (distance < nearestDistance) {
                 nearestDistance = distance;
                 nearestCollision = collision;

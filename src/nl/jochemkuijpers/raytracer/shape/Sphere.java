@@ -2,6 +2,7 @@ package nl.jochemkuijpers.raytracer.shape;
 
 import nl.jochemkuijpers.raytracer.math.Ray;
 import nl.jochemkuijpers.raytracer.math.RayCollision;
+import nl.jochemkuijpers.raytracer.math.Vector;
 import nl.jochemkuijpers.raytracer.math.Vector3;
 
 public class Sphere implements Shape {
@@ -18,8 +19,8 @@ public class Sphere implements Shape {
         // t is the solution for collisionPosition = ray.origin + t * ray.direction
         double t;
 
-        Vector3 originToCenter = center.subtract(ray.origin);
-        double tca = originToCenter.dot(ray.direction);
+        Vector3 originToCenter = Vector.subtract(center, ray.origin, new Vector3());
+        double tca = Vector.dot(originToCenter, ray.direction);
         double distanceSqr = originToCenter.lengthSquared() - tca * tca;
 
         double radiusSqr = radius * radius;
@@ -39,8 +40,9 @@ public class Sphere implements Shape {
             }
         }
 
-        Vector3 collisionPosition = ray.origin.add(ray.direction.multiply(t));
-        Vector3 normal = collisionPosition.subtract(center);
+        // optimization: we can recycle originToCenter to store the answer since it is not being used anymore
+        Vector3 collisionPosition = Vector.addMultiple(ray.origin, ray.direction, t, originToCenter);
+        Vector3 normal = Vector.subtract(collisionPosition, center, new Vector3()).normalize();
 
         return new RayCollision(ray, normal, collisionPosition);
     }

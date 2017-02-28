@@ -29,8 +29,6 @@ public class ImageRenderer {
      * @return image from the light map
      */
     public RenderedImage render(LightMap lightMap, int ssFactor) {
-        BufferedImage image = new BufferedImage(lightMap.getWidth(), lightMap.getHeight(), BufferedImage.TYPE_INT_ARGB);
-
         int width = lightMap.getWidth();
         int height = lightMap.getHeight();
 
@@ -38,8 +36,13 @@ public class ImageRenderer {
             throw new RuntimeException("lightmap resolution is not a multiple of the super sampling factor given");
         }
 
-        colorStrategy.reset();
+        BufferedImage image = new BufferedImage(
+                lightMap.getWidth() / ssFactor,
+                lightMap.getHeight() / ssFactor,
+                BufferedImage.TYPE_INT_ARGB
+        );
 
+        colorStrategy.reset();
         for (int y = 0; y < height / ssFactor; y++) {
             for (int x = 0; x < width / ssFactor; x++) {
                 image.setRGB(x, y, colorStrategy.color(lightMap, x * ssFactor, y * ssFactor, ssFactor));

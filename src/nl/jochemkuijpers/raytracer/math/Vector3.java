@@ -1,11 +1,19 @@
 package nl.jochemkuijpers.raytracer.math;
 
 public class Vector3 {
-    public final double x;
-    public final double y;
-    public final double z;
+    public double x;
+    public double y;
+    public double z;
 
-    public final static Vector3 ZERO = new Vector3(0, 0, 0);
+    public Vector3() {
+        this(0, 0, 0);
+    }
+
+    public Vector3(Vector3 copy) {
+        this.x = copy.x;
+        this.y = copy.y;
+        this.z = copy.z;
+    }
 
     public Vector3(double x, double y, double z) {
         this.x = x;
@@ -13,16 +21,39 @@ public class Vector3 {
         this.z = z;
     }
 
+    public Vector3 set(Vector3 other) {
+        this.x = other.x;
+        this.y = other.y;
+        this.z = other.z;
+        return this;
+    }
+
     public Vector3 add(Vector3 other) {
-        return new Vector3(x + other.x, y + other.y, z + other.z);
+        x += other.x;
+        y += other.y;
+        z += other.z;
+        return this;
+    }
+
+    public Vector3 addMultiple(Vector3 other, double s) {
+        x += other.x * s;
+        y += other.y * s;
+        z += other.z * s;
+        return this;
     }
 
     public Vector3 subtract(Vector3 other) {
-        return new Vector3(x - other.x, y - other.y, z - other.z);
+        x -= other.x;
+        y -= other.y;
+        z -= other.z;
+        return this;
     }
 
     public Vector3 multiply(double s) {
-        return new Vector3(x * s, y * s, z * s);
+        x *= s;
+        y *= s;
+        z *= s;
+        return this;
     }
 
     public double lengthSquared() {
@@ -33,31 +64,17 @@ public class Vector3 {
         return Math.sqrt(lengthSquared());
     }
 
-    public Vector3 normalized() {
-        double l = length();
-        if (l == 1) {
-            return this;
+    public Vector3 normalize() {
+        double length = length();
+        if (length > 0) {
+            multiply(1 / length);
         }
-        if (l == 0) {
-            return Vector3.ZERO;
-        }
-        return multiply(1 / l);
+        return this;
     }
 
-    public Vector3 inverted() {
-        return new Vector3(-x, -y, -z);
-    }
-
-    public double dot(Vector3 other) {
-        return x * other.x + y * other.y + z * other.z;
-    }
-
-    public Vector3 cross(Vector3 other) {
-        return new Vector3(
-                y * other.z - z * other.y,
-                z * other.x - x * other.z,
-                x * other.y - y * other.x
-        );
+    public Vector3 invert() {
+        multiply(-1);
+        return this;
     }
 
     @Override

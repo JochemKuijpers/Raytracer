@@ -27,9 +27,9 @@ public class AutoExposureGammaStrategy implements ColorStrategy {
 
         Vector3 light = getAverageLight(lightMap, x, y, sampleSize);
 
-        int r = clamp(0, (int) (Math.pow(light.x / maxLight, 1 / gamma) * 255.0), 255);
-        int g = clamp(0, (int) (Math.pow(light.y / maxLight, 1 / gamma) * 255.0), 255);
-        int b = clamp(0, (int) (Math.pow(light.z / maxLight, 1 / gamma) * 255.0), 255);
+        int r = clamp(0, (int) (Math.pow(light.x / maxLight, 1 / gamma) * 256), 255);
+        int g = clamp(0, (int) (Math.pow(light.y / maxLight, 1 / gamma) * 256), 255);
+        int b = clamp(0, (int) (Math.pow(light.z / maxLight, 1 / gamma) * 256), 255);
 
         return 255 << 24 | r << 16 | g << 8 | b;
     }
@@ -55,15 +55,15 @@ public class AutoExposureGammaStrategy implements ColorStrategy {
      * @return
      */
     private Vector3 getAverageLight(LightMap lightMap, int x, int y, int sampleSize) {
-        Vector3 avgLight = Vector3.ZERO;
+        Vector3 avgLight = new Vector3();
 
         for (int sy = 0; sy < sampleSize; sy++) {
             for (int sx = 0; sx < sampleSize; sx++) {
-                avgLight = avgLight.add(lightMap.getLight(x + sx, y + sy));
+                avgLight.add(lightMap.getLight(x + sx, y + sy));
             }
         }
 
-        return avgLight.multiply(1 / (sampleSize * sampleSize));
+        return avgLight.multiply(1.0 / (sampleSize * sampleSize));
     }
 
     /**
@@ -79,6 +79,10 @@ public class AutoExposureGammaStrategy implements ColorStrategy {
                 Vector3 light = getAverageLight(lightMap, x, y, sampleSize);
                 maxLight = Math.max(light.x, Math.max(light.y, Math.max(light.z, maxLight)));
             }
+        }
+
+        if (maxLight <= 0) {
+            maxLight = 1;
         }
     }
 }

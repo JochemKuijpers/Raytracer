@@ -2,6 +2,7 @@ package nl.jochemkuijpers.raytracer.render;
 
 import nl.jochemkuijpers.raytracer.color.LightMap;
 import nl.jochemkuijpers.raytracer.math.Ray;
+import nl.jochemkuijpers.raytracer.math.Vector;
 import nl.jochemkuijpers.raytracer.math.Vector2;
 import nl.jochemkuijpers.raytracer.math.Vector3;
 
@@ -24,8 +25,8 @@ public class Camera {
      */
     public Camera(Vector3 position, Vector3 gaze, Vector3 up, double fov) {
         this.position = position;
-        this.gaze = gaze.normalized();
-        this.up = up.normalized();
+        this.gaze = gaze.normalize();
+        this.up = up.normalize();
         this.fov = fov / 180 * Math.PI;
     }
 
@@ -42,12 +43,10 @@ public class Camera {
         return createLightMap(rays);
     }
 
-
-
     private Ray[][] createRays(Vector2 resolution) {
         Ray[][] rays = new Ray[(int) resolution.y][(int) resolution.x];
-        Vector3 horizon = gaze.cross(up).normalized();
-        Vector3 vertical = gaze.cross(horizon).normalized();
+        Vector3 horizontal = Vector.cross(gaze, up, new Vector3()).normalize();
+        Vector3 vertical = Vector.cross(gaze, horizontal, new Vector3()).normalize();
 
         double hFov, vFov;
 
@@ -64,10 +63,10 @@ public class Camera {
 
         for (int y = 0; y < resolution.y; y++) {
             for (int x = 0; x < resolution.x; x++) {
-                Vector3 direction = gaze
-                        .add(horizon.multiply(((x / (resolution.x - 1)) * 2 - 1) * sinHor))
-                        .add(vertical.multiply(((y / (resolution.y - 1)) * 2 - 1) * sinVer))
-                        .normalized();
+                Vector3 direction = new Vector3(gaze);
+                direction.addMultiple(horizontal, ((x / (resolution.x - 1)) * 2 - 1) * sinHor);
+                direction.addMultiple(vertical, ((y / (resolution.y - 1)) * 2 - 1) * sinVer);
+                direction.normalize();
 
                 rays[y][x] = new Ray(position, direction);
             }

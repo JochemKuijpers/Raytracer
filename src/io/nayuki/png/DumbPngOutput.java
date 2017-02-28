@@ -1,4 +1,6 @@
-package io.nayuki.png;/*
+package io.nayuki.png;
+
+/*
  * Dumb PNG Output
  *
  * Copyright (c) 2017 Project Nayuki
