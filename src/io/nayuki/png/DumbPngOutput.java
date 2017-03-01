@@ -33,23 +33,6 @@ import java.util.zip.CRC32;
 public final class DumbPngOutput {
 
     /**
-     * Demo program, which creates the image DumbPngOutDemo.png in the current directory.
-     * The image is 3 x 2 pixels and looks like this:
-     * [ Red  , Green, Blue  ]
-     * [ Black, Gray , White ]
-     */
-    public static void main(String[] args) throws IOException {
-        int[][] image = {
-                {0xFF0000, 0x00FF00, 0x0000FF},
-                {0x000000, 0x808080, 0xFFFFFF},
-        };
-        try (OutputStream out = new FileOutputStream("DumbPngOutDemo.png")) {
-            write(image, out);
-        }
-    }
-
-
-    /**
      * Writes the specified RGB24 image to the specified output stream as a PNG file.
      * <p>The array has this format: {@code image[y][x] = 0xRRGGBB} (where each color channel
      * uses 8 bits). The array must be rectangular and each dimension must be at least 1.</p>

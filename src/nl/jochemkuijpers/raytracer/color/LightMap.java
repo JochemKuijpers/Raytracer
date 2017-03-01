@@ -1,14 +1,15 @@
 package nl.jochemkuijpers.raytracer.color;
 
+import nl.jochemkuijpers.raytracer.math.Vector2;
 import nl.jochemkuijpers.raytracer.math.Vector3;
 
 public class LightMap {
     private Vector3[][] lightMap;
 
-    public LightMap(int width, int height) {
-        this.lightMap = new Vector3[height][width];
-        for (int y = 0; y < height; y += 1) {
-            for (int x = 0; x < width; x += 1) {
+    public LightMap(Vector2 resolution) {
+        this.lightMap = new Vector3[(int) resolution.y][(int) resolution.x];
+        for (int y = 0; y < resolution.y; y += 1) {
+            for (int x = 0; x < resolution.x; x += 1) {
                 this.lightMap[y][x] = new Vector3(0, 0, 0);
             }
         }
@@ -23,7 +24,7 @@ public class LightMap {
     }
 
     public void setLight(int x, int y, Vector3 color) {
-        this.lightMap[y][x] = color;
+        this.lightMap[y][x].set(color);
     }
 
     public Vector3 getLight(int x, int y) {

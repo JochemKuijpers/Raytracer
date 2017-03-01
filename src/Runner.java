@@ -1,3 +1,4 @@
+import io.nayuki.png.DumbPngOutput;
 import nl.jochemkuijpers.raytracer.ImageRenderer;
 import nl.jochemkuijpers.raytracer.color.AutoExposureGammaStrategy;
 import nl.jochemkuijpers.raytracer.color.LightMap;
@@ -8,48 +9,45 @@ import nl.jochemkuijpers.raytracer.render.RayCaster;
 import nl.jochemkuijpers.raytracer.render.Scene;
 import nl.jochemkuijpers.raytracer.shape.Sphere;
 
-import javax.imageio.ImageIO;
-import java.awt.image.RenderedImage;
-import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 public class Runner {
 
     public static void main(String[] args) {
-
-        Vector2 resolution = new Vector2(1920, 1080);
-        int ssFactor = 3;
+        Vector2 resolution = new Vector2(1920*4, 1080*4);
+        int ssFactor = 1;
 
         long startTime = System.nanoTime();
 
         Camera camera = new Camera(
-                new Vector3(0, 2, 3),
-                new Vector3(0, -1, -.2),
+                new Vector3(0, 0, 0),
+                new Vector3(1, 1, 0),
                 new Vector3(0, 0, 1),
-                50
+                60
         );
 
         Scene scene = new Scene();
-        scene.add(new Sphere(new Vector3(-4, -10, 1.2), 1.2));
-        scene.add(new Sphere(new Vector3(-1, -3, .8), .8));
-        scene.add(new Sphere(new Vector3(.5, -6, 1), 1));
-        scene.add(new Sphere(new Vector3(2, -5, 2.3), 2.3));
+        scene.add(new Sphere(new Vector3(10, 4, 2), 3));
+        scene.add(new Sphere(new Vector3(6, 12, 1), 5));
 
         RayCaster rc = new RayCaster(scene, 1);
         LightMap lightMap = camera.render(resolution.multiply(ssFactor), rc);
 
         long rayTime = System.nanoTime();
+        System.out.println();
         System.out.println("Raytracing done.");
 
         ImageRenderer ir = new ImageRenderer(new AutoExposureGammaStrategy(2.2));
-        RenderedImage image = ir.render(lightMap, ssFactor);
+        int[][] image = ir.render(lightMap, ssFactor);
 
         long rgbTime = System.nanoTime();
         System.out.println("RGB conversion done.");
 
 
-        try {
-            ImageIO.write(image, "png", new File("output.png"));
+        try (OutputStream out = new FileOutputStream("output.png")) {
+            DumbPngOutput.write(image, out);
         } catch (IOException e) {
             e.printStackTrace();
         }
