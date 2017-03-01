@@ -28,31 +28,38 @@ public class Vector3 {
         return this;
     }
 
+    public Vector3 set(double x, double y, double z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        return this;
+    }
+
     public Vector3 add(Vector3 other) {
-        x += other.x;
-        y += other.y;
-        z += other.z;
+        this.x += other.x;
+        this.y += other.y;
+        this.z += other.z;
         return this;
     }
 
     public Vector3 addMultiple(Vector3 other, double s) {
-        x += other.x * s;
-        y += other.y * s;
-        z += other.z * s;
+        this.x += other.x * s;
+        this.y += other.y * s;
+        this.z += other.z * s;
         return this;
     }
 
     public Vector3 subtract(Vector3 other) {
-        x -= other.x;
-        y -= other.y;
-        z -= other.z;
+        this.x -= other.x;
+        this.y -= other.y;
+        this.z -= other.z;
         return this;
     }
 
     public Vector3 multiply(double s) {
-        x *= s;
-        y *= s;
-        z *= s;
+        this.x *= s;
+        this.y *= s;
+        this.z *= s;
         return this;
     }
 
@@ -79,6 +86,6 @@ public class Vector3 {
 
     @Override
     public String toString() {
-        return "(" + x + "," + y + "," + z + ")";
+        return "(" + this.x + "," + this.y + "," + this.z + ")";
     }
 }
