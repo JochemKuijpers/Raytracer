@@ -6,6 +6,13 @@ public class Ray {
     public final Vector3 light;
 
     /**
+     * Create a ray
+     */
+    public Ray() {
+        this(new Vector3(), new Vector3());
+    }
+
+    /**
      * Create a ray with a starting position and a direction
      *
      * @param origin    origin postion

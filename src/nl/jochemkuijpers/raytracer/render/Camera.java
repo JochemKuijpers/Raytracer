@@ -31,57 +31,39 @@ public class Camera {
     }
 
     public LightMap render(Vector2 resolution, RayCaster rayCaster) {
+        LightMap lightMap = new LightMap(resolution);
+        double sinHor, sinVer, cosFov;
+        sinHor = Math.sin(fov/2);
+        sinVer = sinHor;
+        cosFov = Math.cos(fov/2);
 
-        Ray[][] rays = createRays(resolution);
+        Vector3 viewPlaneOrigin = Vector.multiply(gaze, cosFov, new Vector3());
+        Vector3 viewPlaneHorizontal = Vector.cross(gaze, up, new Vector3()).normalize();
+        Vector3 viewPlaneVertical = Vector.cross(gaze, viewPlaneHorizontal, new Vector3()).normalize();
 
-        for (int y = 0; y < rays.length; y++) {
-            for (int x = 0; x < rays[y].length; x++) {
-                rayCaster.cast(rays[y][x]);
-            }
-        }
-
-        return createLightMap(rays);
-    }
-
-    private Ray[][] createRays(Vector2 resolution) {
-        Ray[][] rays = new Ray[(int) resolution.y][(int) resolution.x];
-        Vector3 horizontal = Vector.cross(gaze, up, new Vector3()).normalize();
-        Vector3 vertical = Vector.cross(gaze, horizontal, new Vector3()).normalize();
-
-        double hFov, vFov;
 
         if (resolution.x > resolution.y) {
-            hFov = fov;
-            vFov = fov * resolution.y / resolution.x;
+            sinVer *= resolution.y / resolution.x;
         } else {
-            hFov = fov * resolution.x / resolution.y;
-            vFov = fov;
+            sinHor *= resolution.x / resolution.y;
         }
 
-        double sinHor = Math.sin(hFov);
-        double sinVer = Math.sin(vFov);
+        Ray primaryRay = new Ray();
+        primaryRay.origin.set(position);
 
         for (int y = 0; y < resolution.y; y++) {
             for (int x = 0; x < resolution.x; x++) {
-                Vector3 direction = new Vector3(gaze);
-                direction.addMultiple(horizontal, ((x / (resolution.x - 1)) * 2 - 1) * sinHor);
-                direction.addMultiple(vertical, ((y / (resolution.y - 1)) * 2 - 1) * sinVer);
-                direction.normalize();
-
-                rays[y][x] = new Ray(position, direction);
+                primaryRay.light.set(0, 0, 0);
+                primaryRay.direction
+                        .set(viewPlaneOrigin)
+                        .addMultiple(viewPlaneHorizontal, (((x + 0.5) / resolution.x) * 2 - 1) * sinHor)
+                        .addMultiple(viewPlaneVertical, (((y + 0.5) / resolution.y) * 2 - 1) * sinVer)
+                        .normalize();
+                rayCaster.cast(primaryRay);
+                lightMap.setLight(x, y, primaryRay.light);
             }
-        }
-
-        return rays;
-    }
-
-    private LightMap createLightMap(Ray[][] rays) {
-        LightMap lightMap = new LightMap(rays[0].length, rays.length);
-
-        for (int y = 0; y < rays.length; y++) {
-            for (int x = 0; x < rays[y].length; x++) {
-                lightMap.setLight(x, y, rays[y][x].light);
-            }
+            if ((y % 64) > 0) { continue; }
+            System.out.print(".");
         }
 
         return lightMap;
