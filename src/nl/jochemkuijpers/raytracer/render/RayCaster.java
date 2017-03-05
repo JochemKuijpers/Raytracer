@@ -4,7 +4,9 @@ import nl.jochemkuijpers.raytracer.math.Ray;
 import nl.jochemkuijpers.raytracer.math.RayCollision;
 import nl.jochemkuijpers.raytracer.math.Vector;
 import nl.jochemkuijpers.raytracer.math.Vector3;
-import nl.jochemkuijpers.raytracer.shape.Shape;
+import nl.jochemkuijpers.raytracer.scene.Light;
+import nl.jochemkuijpers.raytracer.scene.Scene;
+import nl.jochemkuijpers.raytracer.scene.Shape;
 
 import java.util.List;
 
@@ -40,13 +42,22 @@ public class RayCaster {
             return new Vector3();
         }
 
+        List<Light> lights = scene.getCandidateLights(ray);
+
+        Vector3 addVector = new Vector3();
+        Vector3 totalLight = new Vector3();
+        Ray lightRay = new Ray(collision.collidePosition, collision.normal);
+        for (Light light: lights) {
+            light.calculateLight(lightRay, addVector);
+            totalLight.add(addVector);
+        }
+        return totalLight.multiply(collision.shape.material.color);
+
         // TODO set ray color based on material properties
 
         // TODO cast ray to all light sources and set light based on cosine thingy
 
         // TODO cast recursive rays based on material properties
-
-        return new Vector3(collision.normal);
     }
 
     private RayCollision findNearestCollision(Ray ray, List<Shape> shapes) {

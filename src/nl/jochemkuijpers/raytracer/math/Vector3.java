@@ -63,6 +63,13 @@ public class Vector3 {
         return this;
     }
 
+    public Vector3 multiply(Vector3 other) {
+        this.x *= other.x;
+        this.y *= other.y;
+        this.z *= other.z;
+        return this;
+    }
+
     public double lengthSquared() {
         return this.x * this.x + this.y * this.y + this.z * this.z;
     }

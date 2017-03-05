@@ -1,15 +1,17 @@
-package nl.jochemkuijpers.raytracer.shape;
+package nl.jochemkuijpers.raytracer.scene;
 
 import nl.jochemkuijpers.raytracer.math.Ray;
 import nl.jochemkuijpers.raytracer.math.RayCollision;
 import nl.jochemkuijpers.raytracer.math.Vector;
 import nl.jochemkuijpers.raytracer.math.Vector3;
 
-public class Sphere implements Shape {
+public class Sphere extends Shape {
     private final Vector3 center;
     private final double radius;
 
-    public Sphere(Vector3 center, double radius) {
+    public Sphere(Material material, Vector3 center, double radius) {
+        super(material);
+
         this.center = center;
         this.radius = radius;
     }
@@ -44,6 +46,6 @@ public class Sphere implements Shape {
         Vector3 collisionPosition = Vector.addMultiple(ray.origin, ray.direction, t, originToCenter);
         Vector3 normal = Vector.subtract(collisionPosition, center, new Vector3()).normalize();
 
-        return new RayCollision(ray, normal, collisionPosition);
+        return new RayCollision(this, normal, collisionPosition);
     }
 }
