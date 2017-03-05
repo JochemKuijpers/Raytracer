@@ -74,6 +74,23 @@ public class Vector {
     }
 
     /**
+     * Combines two vectors as follows: c = a * s1 + b * s2
+     *
+     * @param a  vector a
+     * @param s1 scalar for a
+     * @param b  vector b
+     * @param s2 scalar for b
+     * @param c  vector c
+     * @return vector c
+     */
+    public static Vector3 combine(Vector3 a, double s1, Vector3 b, double s2, Vector3 c) {
+        c.x = a.x * s1 + b.x * s2;
+        c.y = a.y * s1 + b.y * s2;
+        c.z = a.z * s1 + b.z * s2;
+        return c;
+    }
+
+    /**
      * Sets vector b to the normalized vector a
      *
      * @param a vector a
@@ -111,6 +128,7 @@ public class Vector {
 
     /**
      * Returns the square of the magnitude of the difference vector between vector a and vector b
+     *
      * @param a vector a
      * @param b vector b
      * @return square of the magnitude of the difference vector

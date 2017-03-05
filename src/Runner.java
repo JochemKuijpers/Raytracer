@@ -34,8 +34,8 @@ public class Runner {
         buildScene();
 
         Camera camera = new Camera(
-                new Vector3(-5, -5, 10),
-                new Vector3(1, 1, -0.333),
+                new Vector3(10, -10, 10),
+                new Vector3(.5, 1, -0.1),
                 new Vector3(0, 0, 1),
                 60
         );
@@ -64,20 +64,24 @@ public class Runner {
     }
 
     private void buildScene() {
-        Material chrome = new Material(new Vector3(1, 1, 1), 0, .95);
-        Material white = new Material(new Vector3(1, 1, 1), 0, 0.1);
-        Material red = new Material(new Vector3(1, 0.1, 0.1), 0, 0);
-        Material green = new Material(new Vector3(0.1, 1, 0.1), 0, 0);
-        Material blue = new Material(new Vector3(0.1, 0.1, 1), 0, 0);
+        Material chrome = new Material(new Vector3(1, 1, 1), 0, .95, 1);
+        Material white = new Material(new Vector3(1, 1, 1), 0, 0.05, 1);
 
-        scene.add(new Sphere(chrome, new Vector3(10, 4, 6), 3));
-        scene.add(new Sphere(white, new Vector3(6, 12, 5), 5));
+        Material glass = new Material(new Vector3(1, 1, 1), 0.9, 0.0, 1.05);
+
+        Material red = new Material(new Vector3(1, 0.1, 0.1), 0, 0, 1);
+        Material green = new Material(new Vector3(0.1, 1, 0.1), 0, 0, 1);
+        Material blue = new Material(new Vector3(0.1, 0.1, 1), 0, 0, 1);
+
+        scene.add(new Sphere(chrome, new Vector3(15, 30, 7), 7));
+        scene.add(new Sphere(white, new Vector3(40, 40, 7), 7));
+        scene.add(new Sphere(glass, new Vector3(30, 15, 7), 7));
 
         scene.add(new Sphere(red, new Vector3(0, 0, -10000), 10000));
         scene.add(new Sphere(green, new Vector3(0, 10100, 0), 10000));
         scene.add(new Sphere(blue, new Vector3( 10100, 0, 0), 10000));
 
-        scene.add(new DirectionalLight(new Vector3(0.15, 0.12, -1), new Vector3(1, 1, 1)));
+        scene.add(new DirectionalLight(new Vector3(0.5, 0.5, -1), new Vector3(1, 1, 1)));
         scene.add(new DirectionalLight(new Vector3(.7, .2, -.2), new Vector3(0.33, 1, 0.66)));
         scene.add(new DirectionalLight(new Vector3(.3, 0.6, -.1), new Vector3(0.66, 0.33, 1)));
     }
