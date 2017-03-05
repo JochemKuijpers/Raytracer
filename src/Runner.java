@@ -1,14 +1,13 @@
 import io.nayuki.png.DumbPngOutput;
 import nl.jochemkuijpers.raytracer.Timer;
 import nl.jochemkuijpers.raytracer.color.AutoExposureDitheringGammaStrategy;
-import nl.jochemkuijpers.raytracer.color.AutoExposureGammaStrategy;
 import nl.jochemkuijpers.raytracer.math.Vector3;
 import nl.jochemkuijpers.raytracer.render.Camera;
 import nl.jochemkuijpers.raytracer.render.RayCaster;
-import nl.jochemkuijpers.raytracer.scene.DirectionalLight;
-import nl.jochemkuijpers.raytracer.scene.Scene;
 import nl.jochemkuijpers.raytracer.render.SensorImage;
+import nl.jochemkuijpers.raytracer.scene.DirectionalLight;
 import nl.jochemkuijpers.raytracer.scene.Material;
+import nl.jochemkuijpers.raytracer.scene.Scene;
 import nl.jochemkuijpers.raytracer.scene.Sphere;
 
 import java.io.FileOutputStream;
@@ -17,11 +16,22 @@ import java.io.OutputStream;
 
 public class Runner {
 
-    public static void main(String[] args) throws IOException {
+    private final Scene scene;
 
+    public static void main(String[] args) throws IOException {
+        new Runner().run();
+    }
+
+    public Runner() {
+        this.scene = new Scene();
+    }
+
+    public void run() {
         Timer timer = new Timer();
 
         SensorImage sensorImage = new SensorImage(1920, 1080, 2);
+
+        buildScene();
 
         Camera camera = new Camera(
                 new Vector3(-5, -5, 10),
@@ -30,21 +40,7 @@ public class Runner {
                 60
         );
 
-        Scene scene = new Scene();
-
-        Material red = new Material(new Vector3(1, 0, 0));
-        Material white = new Material(new Vector3(1, 1, 1));
-
-        scene.add(new Sphere(red, new Vector3(10, 4, 3), 3));
-        scene.add(new Sphere(white, new Vector3(6, 12, 5), 5));
-        scene.add(new Sphere(white, new Vector3(0, 0, -10000), 10000));
-        scene.add(new Sphere(white, new Vector3(0, 10100, 0), 10000));
-        scene.add(new Sphere(white, new Vector3( 10100, 0, 0), 10000));
-        scene.add(new DirectionalLight(new Vector3(0, 0, -1), new Vector3(1, 1, 1)));
-        scene.add(new DirectionalLight(new Vector3(.7, -.2, .8), new Vector3(0.1, 0.2, 0.2)));
-        scene.add(new DirectionalLight(new Vector3(-.3, 0.6, .8), new Vector3(0.2, 0.1, 0.3)));
-
-        RayCaster rc = new RayCaster(scene, 1);
+        RayCaster rc = new RayCaster(scene, 10);
 
         timer.mark("Initialize");
 
@@ -52,6 +48,7 @@ public class Runner {
 
         timer.mark("Raytracing");
 
+//        int[][] image = sensorImage.generateRgbImage(new AutoExposureGammaStrategy(1.8));
         int[][] image = sensorImage.generateRgbImage(new AutoExposureDitheringGammaStrategy(1.8));
 
         timer.mark("RGB conversion");
@@ -64,5 +61,24 @@ public class Runner {
 
         timer.mark("PNG export");
         timer.print();
+    }
+
+    private void buildScene() {
+        Material chrome = new Material(new Vector3(1, 1, 1), 0, .95);
+        Material white = new Material(new Vector3(1, 1, 1), 0, 0.1);
+        Material red = new Material(new Vector3(1, 0.1, 0.1), 0, 0);
+        Material green = new Material(new Vector3(0.1, 1, 0.1), 0, 0);
+        Material blue = new Material(new Vector3(0.1, 0.1, 1), 0, 0);
+
+        scene.add(new Sphere(chrome, new Vector3(10, 4, 6), 3));
+        scene.add(new Sphere(white, new Vector3(6, 12, 5), 5));
+
+        scene.add(new Sphere(red, new Vector3(0, 0, -10000), 10000));
+        scene.add(new Sphere(green, new Vector3(0, 10100, 0), 10000));
+        scene.add(new Sphere(blue, new Vector3( 10100, 0, 0), 10000));
+
+        scene.add(new DirectionalLight(new Vector3(0.15, 0.12, -1), new Vector3(1, 1, 1)));
+        scene.add(new DirectionalLight(new Vector3(.7, .2, -.2), new Vector3(0.33, 1, 0.66)));
+        scene.add(new DirectionalLight(new Vector3(.3, 0.6, -.1), new Vector3(0.66, 0.33, 1)));
     }
 }

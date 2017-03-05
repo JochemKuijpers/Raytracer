@@ -1,6 +1,6 @@
 package nl.jochemkuijpers.raytracer.scene;
 
-import nl.jochemkuijpers.raytracer.math.Ray;
+import nl.jochemkuijpers.raytracer.math.RayCollision;
 import nl.jochemkuijpers.raytracer.math.Vector;
 import nl.jochemkuijpers.raytracer.math.Vector3;
 
@@ -14,9 +14,14 @@ public class DirectionalLight implements Light {
     }
 
     @Override
-    public void calculateLight(Ray ray, Vector3 light) {
+    public void calculateLight(RayCollision collision, Vector3 light) {
         light
                 .set(this.light)
-                .multiply(Math.max(0, -Vector.dot(ray.direction, direction)));
+                .multiply(Math.max(0, -Vector.dot(collision.normal, direction)));
+    }
+
+    @Override
+    public void getPosition(RayCollision collision, Vector3 position) {
+        position.set(collision.collidePosition).addMultiple(direction, -1e15);
     }
 }

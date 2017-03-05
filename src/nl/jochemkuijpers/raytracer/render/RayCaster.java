@@ -5,6 +5,7 @@ import nl.jochemkuijpers.raytracer.math.RayCollision;
 import nl.jochemkuijpers.raytracer.math.Vector;
 import nl.jochemkuijpers.raytracer.math.Vector3;
 import nl.jochemkuijpers.raytracer.scene.Light;
+import nl.jochemkuijpers.raytracer.scene.Material;
 import nl.jochemkuijpers.raytracer.scene.Scene;
 import nl.jochemkuijpers.raytracer.scene.Shape;
 
@@ -29,42 +30,45 @@ public class RayCaster {
     }
 
     private Vector3 cast(Ray ray, int depth) {
+        Vector3 totalLight = new Vector3();
+
         // recursive stop condition
         if (depth > maxDepth) {
             return new Vector3();
         }
 
         // find nearest collision
-        List<Shape> shapes = scene.getCandidateShapes(ray);
-        RayCollision collision = findNearestCollision(ray, shapes);
-
+        RayCollision collision = findNearestCollision(ray);
         if (collision == null) {
             return new Vector3();
         }
 
-        List<Light> lights = scene.getCandidateLights(ray);
+        Material material = collision.shape.material;
 
-        Vector3 addVector = new Vector3();
-        Vector3 totalLight = new Vector3();
-        Ray lightRay = new Ray(collision.collidePosition, collision.normal);
-        for (Light light: lights) {
-            light.calculateLight(lightRay, addVector);
-            totalLight.add(addVector);
+        totalLight.addMultiple(calculateLighting(ray, collision), (1 - material.reflectivity - material.transparency));
+
+        if (material.reflectivity > 0) {
+            Vector3 reflectionDirection = new Vector3(ray.direction).addMultiple(collision.normal, Vector.dot(collision.normal, ray.direction) * -2);
+            Ray reflectionRay = new Ray(collision.collidePosition, reflectionDirection);
+
+            Vector3 reflection = cast(reflectionRay, depth + 1);
+
+            totalLight.addMultiple(reflection, material.reflectivity);
         }
-        return totalLight.multiply(collision.shape.material.color);
-
-        // TODO set ray color based on material properties
 
         // TODO cast ray to all light sources and set light based on cosine thingy
 
         // TODO cast recursive rays based on material properties
+        return totalLight;
     }
 
-    private RayCollision findNearestCollision(Ray ray, List<Shape> shapes) {
-        double nearestDistance = 1e30;
-        double distance;
+    private RayCollision findNearestCollision(Ray ray) {
+        List<Shape> shapes = scene.getCandidateShapes(ray);
+
         RayCollision nearestCollision = null;
         RayCollision collision;
+        double nearestDistance = 1e30;
+        double distance;
 
         for (Shape shape : shapes) {
             collision = shape.test(ray);
@@ -73,7 +77,7 @@ public class RayCaster {
             }
 
             distance = Vector.differenceLengthSquared(ray.origin, collision.collidePosition);
-            if (distance < nearestDistance) {
+            if (distance < nearestDistance && distance > 1e-10) {
                 nearestDistance = distance;
                 nearestCollision = collision;
             }
@@ -82,5 +86,34 @@ public class RayCaster {
         return nearestCollision;
     }
 
+    private Vector3 calculateLighting(Ray ray, RayCollision collision) {
+        List<Light> lights = scene.getCandidateLights(ray);
+
+        Vector3 addVector = new Vector3();
+        Vector3 totalLight = new Vector3();
+        Vector3 lightPosition = new Vector3();
+        Ray lightRay = new Ray(collision.collidePosition, new Vector3());
+        RayCollision lightRayCollision;
+        for (Light light: lights) {
+            light.getPosition(collision, lightPosition);
+            lightRay.direction.set(lightPosition).subtract(lightRay.origin).normalize();
+
+            lightRayCollision = findNearestCollision(lightRay);
+
+            // a collision!
+            if (lightRayCollision != null) {
+                // collision before light position
+                if (Vector.differenceLengthSquared(lightRay.origin, lightRayCollision.collidePosition) <
+                        Vector.differenceLengthSquared(lightRay.origin, lightPosition)) {
+                    continue;
+                }
+            }
+
+            light.calculateLight(collision, addVector);
+            totalLight.add(addVector);
+        }
+
+        return totalLight.multiply(collision.shape.material.color);
+    }
 
 }
