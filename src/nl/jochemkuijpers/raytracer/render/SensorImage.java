@@ -46,13 +46,7 @@ public class SensorImage {
     }
 
     public int[][] generateRgbImage(ColorStrategy strategy) {
-        int[][] rgb = new int[height][width];
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                rgb[y][x] = strategy.color(this, x, y);
-            }
-        }
-        return rgb;
+        return strategy.execute(this);
     }
 }
 

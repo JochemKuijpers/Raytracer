@@ -52,7 +52,7 @@ public class Runner {
 
         timer.mark("Raytracing");
 
-        int[][] image = sensorImage.generateRgbImage(new AutoExposureDitheringGammaStrategy(1.8, 0));
+        int[][] image = sensorImage.generateRgbImage(new AutoExposureDitheringGammaStrategy(1.8));
 
         timer.mark("RGB conversion");
 
