@@ -6,10 +6,6 @@ import nl.jochemkuijpers.raytracer.render.SensorImage;
 public class AutoExposureGammaStrategy implements ColorStrategy {
     private final double gamma;
 
-    public AutoExposureGammaStrategy() {
-        this(2.2);
-    }
-
     public AutoExposureGammaStrategy(double gamma) {
         this.gamma = gamma;
     }
