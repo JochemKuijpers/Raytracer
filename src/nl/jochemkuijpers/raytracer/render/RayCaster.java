@@ -48,18 +48,47 @@ public class RayCaster {
         totalLight.addMultiple(calculateLighting(ray, collision), (1 - material.reflectivity - material.transparency));
 
         if (material.reflectivity > 0) {
-            Vector3 reflectionDirection = new Vector3(ray.direction).addMultiple(collision.normal, Vector.dot(collision.normal, ray.direction) * -2);
-            Ray reflectionRay = new Ray(collision.collidePosition, reflectionDirection);
-
+            Ray reflectionRay = reflect(ray, collision);
             Vector3 reflection = cast(reflectionRay, depth + 1);
 
             totalLight.addMultiple(reflection, material.reflectivity);
         }
 
-        // TODO cast ray to all light sources and set light based on cosine thingy
+        if (material.transparency > 0) {
+            Ray refractionRay = refract(ray, collision);
+            Vector3 refraction;
 
-        // TODO cast recursive rays based on material properties
+            if (refractionRay != null) {
+                refraction = castInternal(refractionRay, depth + 1);
+            } else {
+                // total internal reflection
+                Ray reflectionRay = reflect(ray, collision);
+                refraction = cast(reflectionRay, depth + 1);
+            }
+
+            totalLight.add(refraction);
+        }
         return totalLight;
+    }
+
+    private Vector3 castInternal(Ray internalRay, int depth) {
+        if (depth > maxDepth) {
+            return new Vector3();
+        }
+
+        RayCollision collision = findNearestCollision(internalRay);
+        if (collision == null) {
+            return new Vector3();
+        }
+
+        Ray refractionRay = refract(internalRay, collision);
+
+        if (refractionRay != null) {
+            return cast(refractionRay, depth + 1);
+        }
+
+        Ray reflectionRay = reflect(internalRay, collision);
+        return castInternal(reflectionRay, depth + 1);
     }
 
     private RayCollision findNearestCollision(Ray ray) {
@@ -77,7 +106,7 @@ public class RayCaster {
             }
 
             distance = Vector.differenceLengthSquared(ray.origin, collision.collidePosition);
-            if (distance < nearestDistance && distance > 1e-10) {
+            if (distance < nearestDistance) {
                 nearestDistance = distance;
                 nearestCollision = collision;
             }
@@ -92,7 +121,12 @@ public class RayCaster {
         Vector3 addVector = new Vector3();
         Vector3 totalLight = new Vector3();
         Vector3 lightPosition = new Vector3();
-        Ray lightRay = new Ray(collision.collidePosition, new Vector3());
+
+        Ray lightRay = new Ray(
+                Vector.addMultiple(collision.collidePosition, collision.normal, 1e-10, new Vector3()),
+                new Vector3()
+        );
+
         RayCollision lightRayCollision;
         for (Light light: lights) {
             light.getPosition(collision, lightPosition);
@@ -114,6 +148,44 @@ public class RayCaster {
         }
 
         return totalLight.multiply(collision.shape.material.color);
+    }
+
+    private Ray reflect(Ray ray, RayCollision collision) {
+        Vector3 reflectionDirection = new Vector3(ray.direction)
+                .addMultiple(collision.normal, Vector.dot(collision.normal, ray.direction) * -2);
+
+        return new Ray(
+                Vector.addMultiple(collision.collidePosition, collision.normal, 1e-10, new Vector3()),
+                reflectionDirection
+        );
+    }
+
+    private Ray refract(Ray ray, RayCollision collision) {
+        double cosi = Vector.dot(ray.direction, collision.normal);
+        double etai = 1;
+        double etat = collision.shape.material.refractiveIndex;
+        Vector3 n = new Vector3(collision.normal);
+
+        if (cosi < 0) {
+            cosi = -cosi;
+        } else {
+            etai = etat;
+            etat = 1;
+            n.invert();
+        }
+
+        double eta = etai / etat;
+        double k = 1 - eta * eta * (1 - cosi * cosi);
+
+        if (k < 0) {
+            return null;
+        }
+
+        Vector3 refractionDirection = new Vector3()
+            .addMultiple(ray.direction, eta)
+            .addMultiple(n, eta * cosi - Math.sqrt(k));
+
+        return new Ray(Vector.addMultiple(collision.collidePosition, n, -1e-10, new Vector3()), refractionDirection);
     }
 
 }
