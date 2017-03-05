@@ -1,9 +1,9 @@
 package nl.jochemkuijpers.raytracer.color;
 
 import nl.jochemkuijpers.raytracer.math.Vector3;
+import nl.jochemkuijpers.raytracer.render.SensorImage;
 
 public class AutoExposureGammaStrategy implements ColorStrategy {
-    private double maxLight = -1;
     private final double gamma;
 
     public AutoExposureGammaStrategy() {
@@ -15,74 +15,16 @@ public class AutoExposureGammaStrategy implements ColorStrategy {
     }
 
     @Override
-    public void reset() {
-        maxLight = -1;
-    }
+    public int color(SensorImage sensorImage, int x, int y) {
+        Vector3 light = sensorImage.getLight(x, y);
+        Vector3 maxLight = sensorImage.getMaxLight();
 
-    @Override
-    public int color(LightMap lightMap, int x, int y, int sampleSize) {
-        if (maxLight < 0) {
-            findMaxLight(lightMap, sampleSize);
-        }
+        double exposure = Math.max(maxLight.x, Math.max(maxLight.y, maxLight.z));
 
-        Vector3 light = getAverageLight(lightMap, x, y, sampleSize);
+        int r = Color.toInt(Color.gammaEncode(light.x / exposure, gamma), 0, 255);
+        int g = Color.toInt(Color.gammaEncode(light.y / exposure, gamma), 0, 255);
+        int b = Color.toInt(Color.gammaEncode(light.z / exposure, gamma), 0, 255);
 
-        int r = clamp(0, (int) (Math.pow(light.x / maxLight, 1 / gamma) * 256), 255);
-        int g = clamp(0, (int) (Math.pow(light.y / maxLight, 1 / gamma) * 256), 255);
-        int b = clamp(0, (int) (Math.pow(light.z / maxLight, 1 / gamma) * 256), 255);
-
-        return 255 << 24 | r << 16 | g << 8 | b;
-    }
-
-    /**
-     * Return x if min >= x >= max, otherwise min/max.
-     * @param min minimum value
-     * @param x x
-     * @param max maximum value
-     * @return Math.min(max, Math.max(min, x));
-     */
-    private int clamp(int min, int x, int max) {
-        return (min <= x) ? ((max >= x) ? x : max) : min;
-    }
-
-    /**
-     * Returns the average light value of the sampled area
-     *
-     * @param lightMap   lightmap
-     * @param x          left top x position
-     * @param y          left top y position
-     * @param sampleSize sample size (square: height and width)
-     * @return
-     */
-    private Vector3 getAverageLight(LightMap lightMap, int x, int y, int sampleSize) {
-        Vector3 avgLight = new Vector3();
-
-        for (int sy = 0; sy < sampleSize; sy++) {
-            for (int sx = 0; sx < sampleSize; sx++) {
-                avgLight.add(lightMap.getLight(x + sx, y + sy));
-            }
-        }
-
-        return avgLight.multiply(1.0 / (sampleSize * sampleSize));
-    }
-
-    /**
-     * The goal of this function is to find the largest light value in the image and set maxLight to this value for the
-     * exposure calculation
-     *
-     * @param lightMap   lightmap
-     * @param sampleSize sample size
-     */
-    private void findMaxLight(LightMap lightMap, int sampleSize) {
-        for (int y = 0; y < lightMap.getHeight(); y += sampleSize) {
-            for (int x = 0; x < lightMap.getWidth(); x += sampleSize) {
-                Vector3 light = getAverageLight(lightMap, x, y, sampleSize);
-                maxLight = Math.max(light.x, Math.max(light.y, Math.max(light.z, maxLight)));
-            }
-        }
-
-        if (maxLight <= 0) {
-            maxLight = 1;
-        }
+        return r << 16 | g << 8 | b;
     }
 }

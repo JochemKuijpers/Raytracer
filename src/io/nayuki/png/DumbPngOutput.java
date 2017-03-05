@@ -34,7 +34,7 @@ public final class DumbPngOutput {
 
     /**
      * Writes the specified RGB24 image to the specified output stream as a PNG file.
-     * <p>The array has this format: {@code image[y][x] = 0xRRGGBB} (where each color channel
+     * <p>The array has this format: {@code image[height][width] = 0xRRGGBB} (where each color channel
      * uses 8 bits). The array must be rectangular and each dimension must be at least 1.</p>
      * <p>This implementation runs out of memory if the number of pixels in the
      * image exceeds about 700 million (but this is not a PNG limitation).</p>

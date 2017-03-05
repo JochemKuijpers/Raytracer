@@ -121,4 +121,11 @@ public class Vector {
         double dz = a.z - b.z;
         return (dx * dx + dy * dy + dz * dz);
     }
+
+    public static Vector3 max(Vector3 a, Vector3 b, Vector3 c) {
+        c.x = Math.max(a.x, b.x);
+        c.y = Math.max(a.y, b.y);
+        c.z = Math.max(a.z, b.z);
+        return c;
+    }
 }

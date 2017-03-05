@@ -1,9 +1,7 @@
 package nl.jochemkuijpers.raytracer.render;
 
-import nl.jochemkuijpers.raytracer.color.LightMap;
 import nl.jochemkuijpers.raytracer.math.Ray;
 import nl.jochemkuijpers.raytracer.math.Vector;
-import nl.jochemkuijpers.raytracer.math.Vector2;
 import nl.jochemkuijpers.raytracer.math.Vector3;
 
 public class Camera {
@@ -30,42 +28,41 @@ public class Camera {
         this.fov = fov / 180 * Math.PI;
     }
 
-    public LightMap render(Vector2 resolution, RayCaster rayCaster) {
-        LightMap lightMap = new LightMap(resolution);
+    /**
+     * Renders the current scene to the sensor image.
+     *
+     * @param sensorImage sensor image to render to
+     * @param rayCaster   raycaster to cast rays
+     */
+    public void render(SensorImage sensorImage, RayCaster rayCaster) {
         double sinHor, sinVer, cosFov;
-        sinHor = Math.sin(fov/2);
+        sinHor = Math.sin(fov / 2);
         sinVer = sinHor;
-        cosFov = Math.cos(fov/2);
+        cosFov = Math.cos(fov / 2);
 
         Vector3 viewPlaneOrigin = Vector.multiply(gaze, cosFov, new Vector3());
         Vector3 viewPlaneHorizontal = Vector.cross(gaze, up, new Vector3()).normalize();
         Vector3 viewPlaneVertical = Vector.cross(gaze, viewPlaneHorizontal, new Vector3()).normalize();
 
-
-        if (resolution.x > resolution.y) {
-            sinVer *= resolution.y / resolution.x;
+        if (sensorImage.getWidth() > sensorImage.getHeight()) {
+            sinVer *= (double) sensorImage.getHeight() / (double) sensorImage.getWidth();
         } else {
-            sinHor *= resolution.x / resolution.y;
+            sinHor *= (double) sensorImage.getWidth() / (double) sensorImage.getHeight();
         }
 
-        Ray primaryRay = new Ray();
-        primaryRay.origin.set(position);
+        Ray primaryRay = new Ray(position, new Vector3());
 
-        for (int y = 0; y < resolution.y; y++) {
-            for (int x = 0; x < resolution.x; x++) {
+        for (int y = 0; y < sensorImage.getHeight(); y++) {
+            for (int x = 0; x < sensorImage.getWidth(); x++) {
                 primaryRay.light.set(0, 0, 0);
                 primaryRay.direction
                         .set(viewPlaneOrigin)
-                        .addMultiple(viewPlaneHorizontal, (((x + 0.5) / resolution.x) * 2 - 1) * sinHor)
-                        .addMultiple(viewPlaneVertical, (((y + 0.5) / resolution.y) * 2 - 1) * sinVer)
+                        .addMultiple(viewPlaneHorizontal, (((x + 0.5) / sensorImage.getWidth() ) * 2 - 1) * sinHor)
+                        .addMultiple(viewPlaneVertical,   (((y + 0.5) / sensorImage.getHeight()) * 2 - 1) * sinVer)
                         .normalize();
-                rayCaster.cast(primaryRay);
-                lightMap.setLight(x, y, primaryRay.light);
-            }
-            if ((y % 64) > 0) { continue; }
-            System.out.print(".");
-        }
 
-        return lightMap;
+                sensorImage.setLight(x, y, rayCaster.cast(primaryRay));
+            }
+        }
     }
 }
