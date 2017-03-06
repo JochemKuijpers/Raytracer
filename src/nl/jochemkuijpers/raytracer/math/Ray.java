@@ -3,7 +3,6 @@ package nl.jochemkuijpers.raytracer.math;
 public class Ray {
     public final Vector3 origin;
     public final Vector3 direction;
-    public final Vector3 light;
 
     /**
      * Create a ray
@@ -21,7 +20,6 @@ public class Ray {
     public Ray(Vector3 origin, Vector3 direction) {
         this.origin = origin;
         this.direction = direction.normalize();
-        this.light = new Vector3(0, 0, 0);
     }
 
     @Override

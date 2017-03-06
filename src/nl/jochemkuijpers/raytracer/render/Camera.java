@@ -52,13 +52,17 @@ public class Camera {
 
         Ray primaryRay = new Ray(position, new Vector3());
 
+        double vx, vy;
         for (int y = 0; y < sensorImage.getHeight(); y++) {
             for (int x = 0; x < sensorImage.getWidth(); x++) {
-                primaryRay.light.set(0, 0, 0);
+
+                vx = ((x + 0.5) / sensorImage.getWidth() ) * 2 - 1;
+                vy = ((y + 0.5) / sensorImage.getHeight()) * 2 - 1;
+
                 primaryRay.direction
                         .set(viewPlaneOrigin)
-                        .addMultiple(viewPlaneHorizontal, (((x + 0.5) / sensorImage.getWidth() ) * 2 - 1) * sinHor)
-                        .addMultiple(viewPlaneVertical,   (((y + 0.5) / sensorImage.getHeight()) * 2 - 1) * sinVer)
+                        .addMultiple(viewPlaneHorizontal, vx * sinHor)
+                        .addMultiple(viewPlaneVertical,   vy * sinVer)
                         .normalize();
 
                 sensorImage.setLight(x, y, rayCaster.cast(primaryRay));

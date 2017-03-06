@@ -31,6 +31,7 @@ public class RayCaster {
 
     private Vector3 cast(Ray ray, int depth) {
         Vector3 totalLight = new Vector3();
+        Thread thread = new Thread();
 
         // recursive stop condition
         if (depth > maxDepth) {
@@ -185,7 +186,10 @@ public class RayCaster {
             .addMultiple(ray.direction, eta)
             .addMultiple(n, eta * cosi - Math.sqrt(k));
 
-        return new Ray(Vector.addMultiple(collision.collidePosition, n, -1e-10, new Vector3()), refractionDirection);
+        return new Ray(
+                Vector.addMultiple(collision.collidePosition, n, -1e-10, new Vector3()),
+                refractionDirection
+        );
     }
 
 }
