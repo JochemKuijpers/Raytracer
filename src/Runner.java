@@ -29,13 +29,13 @@ public class Runner {
     public void run() {
         Timer timer = new Timer();
 
-        SensorImage sensorImage = new SensorImage(1920, 1080, 2);
+        SensorImage sensorImage = new SensorImage(1920, 1080 , 1);
 
         buildScene();
 
         Camera camera = new Camera(
-                new Vector3(10, -10, 10),
-                new Vector3(.5, 1, -0.1),
+                new Vector3(-10, -10, 20),
+                new Vector3(1, 1, -0.4),
                 new Vector3(0, 0, 1),
                 60
         );
@@ -64,25 +64,30 @@ public class Runner {
     }
 
     private void buildScene() {
-        Material chrome = new Material(new Vector3(1, 1, 1), 0, .95, 1);
-        Material white = new Material(new Vector3(1, 1, 1), 0, 0.05, 1);
+        Material chrome = new Material(new Vector3(1, 1, 1), false, .95, 1);
+        Material white = new Material(new Vector3(1, 1, 1), false, 0, 1);
+        Material black = new Material(new Vector3(.01, .01, .01), false, 0, 1);
 
-        Material glass = new Material(new Vector3(1, 1, 1), 0.9, 0.0, 1.05);
+        Material glass = new Material(new Vector3(.93, .98, .97), true, 0, 1.20);
 
-        Material red = new Material(new Vector3(1, 0.1, 0.1), 0, 0, 1);
-        Material green = new Material(new Vector3(0.1, 1, 0.1), 0, 0, 1);
-        Material blue = new Material(new Vector3(0.1, 0.1, 1), 0, 0, 1);
+        Material red = new Material(new Vector3(1, 0.1, 0.1), false, 0, 1);
+        Material green = new Material(new Vector3(0.1, 1, 0.1), false, 0, 1);
+        Material blue = new Material(new Vector3(0.1, 0.1, 1), false, 0, 1);
 
-        scene.add(new Sphere(chrome, new Vector3(15, 30, 7), 7));
-        scene.add(new Sphere(white, new Vector3(40, 40, 7), 7));
-        scene.add(new Sphere(glass, new Vector3(30, 15, 7), 7));
+        scene.add(new Sphere(red, new Vector3(20, 40, 7), 7));
+        scene.add(new Sphere(green, new Vector3(40, 40, 7), 7));
+        scene.add(new Sphere(blue, new Vector3(40, 20, 7), 7));
 
-        scene.add(new Sphere(red, new Vector3(0, 0, -10000), 10000));
-        scene.add(new Sphere(green, new Vector3(0, 10100, 0), 10000));
-        scene.add(new Sphere(blue, new Vector3( 10100, 0, 0), 10000));
+        scene.add(new Sphere(chrome, new Vector3(35, 5, 4), 4));
+        scene.add(new Sphere(glass, new Vector3(25, 25, 5), 5));
+        scene.add(new Sphere(chrome, new Vector3(5, 35, 4), 4));
+
+        scene.add(new Sphere(black, new Vector3(0, 0, -10000), 10000));
+        scene.add(new Sphere(white, new Vector3(0, 10100, 0), 10000));
+        scene.add(new Sphere(white, new Vector3( 10100, 0, 0), 10000));
 
         scene.add(new DirectionalLight(new Vector3(0.5, 0.5, -1), new Vector3(1, 1, 1)));
-        scene.add(new DirectionalLight(new Vector3(.7, .2, -.2), new Vector3(0.33, 1, 0.66)));
-        scene.add(new DirectionalLight(new Vector3(.3, 0.6, -.1), new Vector3(0.66, 0.33, 1)));
+        scene.add(new DirectionalLight(new Vector3(.75, .25, -.1), new Vector3(0.33, 0.33, 0.33)));
+        scene.add(new DirectionalLight(new Vector3(.25, .72, -.1), new Vector3(0.33, 0.33, 0.33)));
     }
 }

@@ -22,6 +22,7 @@ public class RayCaster {
 
     /**
      * Casts a ray and returns it's light value. May cast rays recursively until maxDepth is reached.
+     *
      * @param ray ray to cast
      * @return light value
      */
@@ -46,29 +47,33 @@ public class RayCaster {
 
         Material material = collision.shape.material;
 
-        totalLight.addMultiple(calculateLighting(ray, collision), (1 - material.reflectivity - material.transparency));
+        double reflectToRefractRatio;
 
-        if (material.reflectivity > 0) {
-            Ray reflectionRay = reflect(ray, collision);
-            Vector3 reflection = cast(reflectionRay, depth + 1);
+        if (material.isTransparent) {
+            reflectToRefractRatio = fresnel(ray, collision);
 
-            totalLight.addMultiple(reflection, material.reflectivity);
-        }
-
-        if (material.transparency > 0) {
-            Ray refractionRay = refract(ray, collision);
-            Vector3 refraction;
-
-            if (refractionRay != null) {
-                refraction = castInternal(refractionRay, depth + 1);
-            } else {
-                // total internal reflection
-                Ray reflectionRay = reflect(ray, collision);
-                refraction = cast(reflectionRay, depth + 1);
+            // refraction
+            if (reflectToRefractRatio < 1) {
+                Ray refractionRay = refract(ray, collision);
+                if (refractionRay != null) {
+                    Vector3 refraction = castInternal(refractionRay, depth + 1);
+                    refraction.multiply(material.color);
+                    totalLight.addMultiple(refraction, 1 - reflectToRefractRatio);
+                }
             }
+        } else {
+            // direct lighting
+            totalLight.addMultiple(calculateLighting(ray, collision), 1 - material.reflectivity);
 
-            totalLight.add(refraction);
+            // set reflection ratio to material reflectivity
+            reflectToRefractRatio = material.reflectivity;
         }
+
+        // reflection
+        Ray reflectionRay = reflect(ray, collision);
+        Vector3 reflection = cast(reflectionRay, depth + 1);
+        totalLight.addMultiple(reflection, reflectToRefractRatio);
+
         return totalLight;
     }
 
@@ -129,7 +134,7 @@ public class RayCaster {
         );
 
         RayCollision lightRayCollision;
-        for (Light light: lights) {
+        for (Light light : lights) {
             light.getPosition(collision, lightPosition);
             lightRay.direction.set(lightPosition).subtract(lightRay.origin).normalize();
 
@@ -165,14 +170,14 @@ public class RayCaster {
         double cosi = Vector.dot(ray.direction, collision.normal);
         double etai = 1;
         double etat = collision.shape.material.refractiveIndex;
-        Vector3 n = new Vector3(collision.normal);
+        Vector3 normal = new Vector3(collision.normal);
 
         if (cosi < 0) {
             cosi = -cosi;
         } else {
             etai = etat;
             etat = 1;
-            n.invert();
+            normal.invert();
         }
 
         double eta = etai / etat;
@@ -183,13 +188,49 @@ public class RayCaster {
         }
 
         Vector3 refractionDirection = new Vector3()
-            .addMultiple(ray.direction, eta)
-            .addMultiple(n, eta * cosi - Math.sqrt(k));
+                .addMultiple(ray.direction, eta)
+                .addMultiple(normal, eta * cosi - Math.sqrt(k));
 
         return new Ray(
-                Vector.addMultiple(collision.collidePosition, n, -1e-10, new Vector3()),
+                Vector.addMultiple(collision.collidePosition, normal, -1e-10, new Vector3()),
                 refractionDirection
         );
+    }
+
+    /**
+     * Returns the amount of reflection (0.0 - 1.0) using Fresnel equations
+     *
+     * @param ray       incoming ray
+     * @param collision collision data
+     * @return amount of reflection (return value) to use vs refraction (1 minus return value)
+     */
+    private double fresnel(Ray ray, RayCollision collision) {
+        double cosi = Vector.dot(ray.direction, collision.normal);
+        double etai = 1;
+        double etat = collision.shape.material.refractiveIndex;
+        Vector3 normal = new Vector3(collision.normal);
+
+        if (cosi < 0) {
+            cosi = -cosi;
+        } else {
+            etai = etat;
+            etat = 1;
+            normal.invert();
+        }
+
+        double sint = (etai / etat) * Math.sqrt(Math.max(0, 1 - cosi * cosi));
+
+        // total internal reflection
+        if (sint >= 1) {
+            return 1;
+        }
+
+        double cost = Math.sqrt(Math.max(0, 1 - sint * sint));
+        double Rs = ((etat * cosi) - (etai * cost)) / ((etat * cosi) + (etai * cost));
+        double Rp = ((etai * cosi) - (etat * cost)) / ((etai * cosi) + (etat * cost));
+
+        return Math.max(0, Math.min(1, (Rs * Rs + Rp * Rp) / 2));
+
     }
 
 }

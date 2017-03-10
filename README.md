@@ -10,8 +10,8 @@ I try to make performant code, but focus is not on absolute performance.
 - Tracing intersections with spheres
 - Colored objects
 - Directional lighting with shadow casting
-- Reflection
-- Refraction
+- Reflection on non-transparent materials
+- Reflection and refraction on transparent materials (fresnel equations)
 - Gamma correction
 - Automatic 'exposure' based on the received light values
 - Dithering to prevent color banding (on 8-bit color channels)
@@ -23,7 +23,6 @@ I try to make performant code, but focus is not on absolute performance.
 - Supersampling
 - Scene file import
 - Other shapes; cuboids, planes, donuts, cones, pyramids, prisms, etc.
-- Frensel calculations for more accurate reflection/refraction
 - Multithreaded raycasting workers
 - Indirect lighting
 - Depth of field
