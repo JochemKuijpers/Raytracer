@@ -5,10 +5,7 @@ import nl.jochemkuijpers.raytracer.math.Vector3;
 import nl.jochemkuijpers.raytracer.render.Camera;
 import nl.jochemkuijpers.raytracer.render.RayCaster;
 import nl.jochemkuijpers.raytracer.render.SensorImage;
-import nl.jochemkuijpers.raytracer.scene.DirectionalLight;
-import nl.jochemkuijpers.raytracer.scene.Material;
-import nl.jochemkuijpers.raytracer.scene.Scene;
-import nl.jochemkuijpers.raytracer.scene.Sphere;
+import nl.jochemkuijpers.raytracer.scene.*;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -64,15 +61,15 @@ public class Runner {
     }
 
     private void buildScene() {
-        Material chrome = new Material(new Vector3(1, 1, 1), false, .95, 1);
-        Material white = new Material(new Vector3(1, 1, 1), false, 0, 1);
-        Material black = new Material(new Vector3(.01, .01, .01), false, 0, 1);
+        Material chrome = new LegacyMaterial(new Vector3(1, 1, 1), false, .95, 1);
+        Material white = new LegacyMaterial(new Vector3(1, 1, 1), false, 0, 1);
+        Material black = new LegacyMaterial(new Vector3(.01, .01, .01), false, 0, 1);
 
-        Material glass = new Material(new Vector3(.93, .98, .97), true, 0, 1.20);
+        Material glass = new TransparentMaterial(1.20);
 
-        Material red = new Material(new Vector3(1, 0.1, 0.1), false, 0, 1);
-        Material green = new Material(new Vector3(0.1, 1, 0.1), false, 0, 1);
-        Material blue = new Material(new Vector3(0.1, 0.1, 1), false, 0, 1);
+        Material red = new LegacyMaterial(new Vector3(1, 0.1, 0.1), false, 0, 1);
+        Material green = new LegacyMaterial(new Vector3(0.1, 1, 0.1), false, 0, 1);
+        Material blue = new LegacyMaterial(new Vector3(0.1, 0.1, 1), false, 0, 1);
 
         scene.add(new Sphere(red, new Vector3(20, 40, 7), 7));
         scene.add(new Sphere(green, new Vector3(40, 40, 7), 7));

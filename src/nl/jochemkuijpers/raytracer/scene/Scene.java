@@ -1,8 +1,7 @@
 package nl.jochemkuijpers.raytracer.scene;
 
 import nl.jochemkuijpers.raytracer.math.Ray;
-import nl.jochemkuijpers.raytracer.scene.Light;
-import nl.jochemkuijpers.raytracer.scene.Shape;
+import nl.jochemkuijpers.raytracer.math.RayCollision;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,9 +30,10 @@ public class Scene {
      * Returns a list of lights that might be relevant to the ray.
      *
      * @param ray ray
+     * @param collision
      * @return list of lights that might be relevant to the ray.
      */
-    public List<Light> getCandidateLights(Ray ray) {
+    public List<Light> getCandidateLights(Ray ray, RayCollision collision) {
         // just return all lights for now..
         return lights;
     }
